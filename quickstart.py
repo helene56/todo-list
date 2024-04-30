@@ -1,16 +1,19 @@
 import os.path
+
 from google.auth.transport.requests import Request
 from google.oauth2.credentials import Credentials
 from google_auth_oauthlib.flow import InstalledAppFlow
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
 
-from vault import spreadsheet_id #the id for the spreadsheet
 
 # If modifying these scopes, delete the file token.json.
 SCOPES = ["https://www.googleapis.com/auth/spreadsheets.readonly"]
-# Range for data in sheet
-RANGE_NAME = "A1:A3"
+
+# The ID and range of a sample spreadsheet.
+SAMPLE_SPREADSHEET_ID = "1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgvE2upms"
+SAMPLE_RANGE_NAME = "Class Data!A2:E"
+
 
 def main():
   """Shows basic usage of the Sheets API.
@@ -34,25 +37,30 @@ def main():
     # Save the credentials for the next run
     with open("token.json", "w") as token:
       token.write(creds.to_json())
-  try:
-    get_values(spreadsheet_id, creds)
-  except HttpError as error:
-    print(f"An error occurred: {error}")
-    return error
 
-def get_values(spreadsheet_id, creds):
+  try:
     service = build("sheets", "v4", credentials=creds)
 
+    # Call the Sheets API
+    sheet = service.spreadsheets()
     result = (
-        service.spreadsheets()
-        .values()
-        .get(spreadsheetId=spreadsheet_id, range=RANGE_NAME)
+        sheet.values()
+        .get(spreadsheetId=SAMPLE_SPREADSHEET_ID, range=SAMPLE_RANGE_NAME)
         .execute()
     )
-    rows = result.get("values", [])
-    print(f"{rows}")
-    
+    values = result.get("values", [])
+
+    if not values:
+      print("No data found.")
+      return
+
+    print("Name, Major:")
+    for row in values:
+      # Print columns A and E, which correspond to indices 0 and 4.
+      print(f"{row[0]}, {row[4]}")
+  except HttpError as err:
+    print(err)
+
+
 if __name__ == "__main__":
-  # Pass: spreadsheet_id, and range_name
   main()
-  # get_values(spreadsheet_id, range)
