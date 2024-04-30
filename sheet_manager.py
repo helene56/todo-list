@@ -2,16 +2,16 @@ import os.path
 from google.auth.transport.requests import Request
 from google.oauth2.credentials import Credentials
 from google_auth_oauthlib.flow import InstalledAppFlow
-from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
 
+# Import from local files
 from vault import spreadsheet_id #the id for the spreadsheet
+from sheets_get_values import get_values
 
 # If modifying these scopes, delete the file token.json.
 SCOPES = ["https://www.googleapis.com/auth/spreadsheets.readonly"]
-# Range for data in sheet
-RANGE_NAME = "A1:A3"
 
+# main function to authenticate
 def main():
   """Shows basic usage of the Sheets API.
   Prints values from a sample spreadsheet.
@@ -35,24 +35,12 @@ def main():
     with open("token.json", "w") as token:
       token.write(creds.to_json())
   try:
+    # Run the file to get values
     get_values(spreadsheet_id, creds)
   except HttpError as error:
     print(f"An error occurred: {error}")
     return error
 
-def get_values(spreadsheet_id, creds):
-    service = build("sheets", "v4", credentials=creds)
-
-    result = (
-        service.spreadsheets()
-        .values()
-        .get(spreadsheetId=spreadsheet_id, range=RANGE_NAME)
-        .execute()
-    )
-    rows = result.get("values", [])
-    print(f"{rows}")
-    
+# Run main function 
 if __name__ == "__main__":
-  # Pass: spreadsheet_id, and range_name
   main()
-  # get_values(spreadsheet_id, range)
