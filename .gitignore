@@ -1,2 +1,3 @@
 credentials.json
 venv/
+vault.py
