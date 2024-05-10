@@ -2,7 +2,6 @@
 #include "DEV_Config.h"     // Device configuration library header (for GPIO/SPI initialization)
 #include <stdlib.h>         // For dynamic memory allocation
 #include <stdio.h>          // For printf function
-#include "fonts.h"
 #include "GUI_Paint.h"
 
 int main() {
