@@ -29,7 +29,8 @@ int main() {
     Paint_Clear(WHITE);  // Clear the image with a white background
     printf("drawing string...\r\n");
     // Draw a string in English
-    Paint_DrawString_EN(10, 20, "hello world", &Font12, BLACK, WHITE);  // Position at x=10, y=20, font size 12
+    Paint_DrawString_EN(10, 20, "hello world", &FontCustom, WHITE, BLACK);  // Position at x=10, y=20, font size 12
+    Paint_DrawString_EN(10, 50, "hello world", &Font24, WHITE, BLACK);
     printf("drew string...\r\n");
     // Display the image on the e-Paper
     EPD_4IN2_V2_Display(BlackImage);
