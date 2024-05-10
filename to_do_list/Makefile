@@ -45,6 +45,14 @@ TARGET        = epd
 # MSG = -g -O -ffunction-sections -fdata-sections -Wall
 # CFLAGS += $(MSG) -D $(EPD)
 
+#test file paths
+print-paths:
+	@echo "Config Directory: $(DIR_Config)"
+	@echo "EPD Directory: $(DIR_EPD)"
+	@echo "FONTS Directory: $(DIR_FONTS)"
+	@echo "GUI Directory: $(DIR_GUI)"
+	@echo "BIN Directory: $(DIR_BIN)"
+
 # Phony Targets
 .PHONY: all clean rebuild RPI
 
@@ -59,7 +67,6 @@ $(TARGET): $(OBJ_O)
 # $(DIR_BIN)/%.o: %.c
 # 	$(shell mkdir -p $(DIR_BIN))
 # 	$(CC) $(CFLAGS) -c $< -o $@
-
 
 ${DIR_BIN}/%.o: %.c
 	$(CC) $(CFLAGS) -c	$< -o $@ -I $(DIR_Config) -I $(DIR_GUI) -I $(DIR_EPD) $(DEBUG)
@@ -81,7 +88,6 @@ RPI_DEV:
 	$(CC) $(CFLAGS) $(DEBUG_RPI) -c	 $(DIR_Config)/dev_hardware_SPI.c -o $(DIR_BIN)/dev_hardware_SPI.o $(LIB_RPI) $(DEBUG)
 	$(CC) $(CFLAGS) $(DEBUG_RPI) -c	 $(DIR_Config)/RPI_gpiod.c -o $(DIR_BIN)/RPI_gpiod.o $(LIB_RPI) $(DEBUG)
 	$(CC) $(CFLAGS) $(DEBUG_RPI) -c	 $(DIR_Config)/DEV_Config.c -o $(DIR_BIN)/DEV_Config.o $(LIB_RPI) $(DEBUG)
-
 
 # Clean the project
 clean:
