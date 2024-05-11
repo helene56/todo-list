@@ -84,7 +84,17 @@ extern sFONT Font20;
 extern sFONT Font16;
 extern sFONT Font12;
 extern sFONT Font8;
-extern sFONT FontCustom; // custom font added
+extern sFONT FontCustom20; // custom font added robot medium
+extern sFONT FontCustom1_20; // custom font changed font byte width to 1
+extern sFONT FontCustom2_20; // custom font changed xoffset to -1
+extern sFONT FontCustom3_20; // custom font changed xoffset to -3
+extern sFONT FontCustom4_20; // custom font roboto regular
+extern sFONT FontCustom5_20; // custom font roboto regular byte widt = 1
+extern sFONT FontCustom6_20; // custom font poetsenone regular
+extern sFONT FontCustom7_20; // custom font poetsenone regular xoffset to -2
+extern sFONT FontCustom7copy_20; // custom font poetsenone regular xoffset to 2
+extern sFONT FontCustom8_20; // custom font Opensans regular
+extern sFONT FontCustom9_20; // custom font pokemon
 
 extern cFONT Font12CN;
 extern cFONT Font24CN;
