@@ -29,7 +29,7 @@ int main() {
     Paint_Clear(WHITE);  // Clear the image with a white background
     printf("drawing string...\r\n");
     // Draw a string in English
-    Paint_DrawString_EN(10, 20, "hello world", &FontCustom20, WHITE, BLACK);
+    Paint_DrawString_EN(10, 20, "hello world ", &FontCustom20, WHITE, BLACK);
     Paint_DrawString_EN(10, 50, "hello world", &FontCustom8_20, WHITE, BLACK);
     Paint_DrawString_EN(10, 80, "hello world", &FontCustom9_20, WHITE, BLACK);
     Paint_DrawString_EN(10, 110, "hello world", &Font20, WHITE, BLACK);
