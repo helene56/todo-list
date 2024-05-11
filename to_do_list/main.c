@@ -3,6 +3,8 @@
 #include <stdlib.h>         // For dynamic memory allocation
 #include <stdio.h>          // For printf function
 #include "GUI_Paint.h"
+#include <string.h>  // Include the string.h header for strlen()
+
 
 int main() {
     printf("EPD_4IN2_V2_test Demo\r\n");
@@ -28,11 +30,24 @@ int main() {
     Paint_SelectImage(BlackImage);
     Paint_Clear(WHITE);  // Clear the image with a white background
     printf("drawing string...\r\n");
+    // test array
+    // Define an array of pointers to char
+    const char *test[] = {"hej med dig", "hej"};
+    int n = sizeof(test) / sizeof(test[0]);
+    int place = 0;
+    for (int i = 0; i < n; i++)
+    {
+        printf("%d", place);
+        Paint_DrawString_EN(10, 20 + place, test[i], &Font24, WHITE, BLACK);
+        printf("%s\n", test[i]);
+        place += 60;
+    }
+    // Paint_DrawString_EN(10, 20, test, &Font20, WHITE, BLACK);
     // Draw a string in English
-    Paint_DrawString_EN(10, 20, "hello world ", &FontCustom20, WHITE, BLACK);
-    Paint_DrawString_EN(10, 50, "hello world", &FontCustom8_20, WHITE, BLACK);
-    Paint_DrawString_EN(10, 80, "hello world", &FontCustom9_20, WHITE, BLACK);
-    Paint_DrawString_EN(10, 110, "hello world", &Font20, WHITE, BLACK);
+    // Paint_DrawString_EN(10, 20, "hello world ", &FontCustom20, WHITE, BLACK);
+    // Paint_DrawString_EN(10, 50, "hello world", &FontCustom8_20, WHITE, BLACK);
+    // Paint_DrawString_EN(10, 80, "hello world", &FontCustom9_20, WHITE, BLACK);
+    // Paint_DrawString_EN(10, 110, "hello world", &Font20, WHITE, BLACK);
     printf("drew string...\r\n");
     // Display the image on the e-Paper
     EPD_4IN2_V2_Display(BlackImage);
