@@ -30,9 +30,10 @@ int main() {
     Paint_SelectImage(BlackImage);
     Paint_Clear(WHITE);  // Clear the image with a white background
     printf("drawing string...\r\n");
+    
     // test array
     // Define an array of pointers to char
-    const char *test[] = {"hej med dig", "hej"};
+    const char *test[] = {"missing to do", "chapter15 projects"};
     int n = sizeof(test) / sizeof(test[0]);
     int place = 0;
     for (int i = 0; i < n; i++)
