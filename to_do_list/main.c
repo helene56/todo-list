@@ -34,10 +34,12 @@ int main() {
     
     // test array
     // Define an array of pointers to char
-    char *test[10];
-    int n = sizeof(test) / sizeof(test[0]);
+    // char *test[10];
+    read_strings();
+    // int n = sizeof(test) / sizeof(test[0]);
     int place = 0;
-    for (int i = 0; i < n; i++)
+
+    for (int i = 0; i < SIZE; i++)
     {
         printf("%d", place);
         Paint_DrawString_EN(10, 20 + place, test[i], &Font24, WHITE, BLACK);
