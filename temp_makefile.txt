@@ -1,0 +1,17 @@
+epd: DEV_Config.o dev_hardware_SPI.o EPD_4in2_V2.o font24.o GUI_BMPfile.o GUI_Paint.o main.o RPI_gpiod.o
+
+DEV_Config.o: DEV_Config.c DEV_Config.h RPI_gpiod.h
+
+dev_hardware_SPI.o: dev_hardware_SPI.c dev_hardware_SPI.h
+
+EPD_4in2_V2.o: EPD_4in2_V2.c EPD_4in2_V2.h Debug.h
+
+font24.o: font24.c fonts.h
+
+GUI_BMPfile.o: GUI_BMPfile.c GUI_BMPfile.h GUI_Paint.h Debug.h
+
+GUI_Paint.o: GUI_Paint.c 
+
+main.o:
+
+RPI_gpiod.o:
