@@ -34,7 +34,7 @@ int main() {
     
     // test array
     // Define an array of pointers to char
-    char *test[] = {""};
+    char *test[10];
     int n = sizeof(test) / sizeof(test[0]);
     int place = 0;
     for (int i = 0; i < n; i++)
