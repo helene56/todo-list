@@ -2,39 +2,92 @@ DIR_Config	 = ./lib/Config
 DIR_EPD		 = ./lib/e-Paper
 DIR_FONTS	 = ./lib/Fonts
 DIR_GUI		 = ./lib/GUI
+DIR_Examples = ./examples
 DIR_BIN		 = ./bin
 
-OBJS = $(DIR_BIN)/DEV_Config.o $(DIR_BIN)/dev_hardware_SPI.o $(DIR_BIN)/EPD_4in2_V2.o $(DIR_BIN)/font24.o $(DIR_BIN)/GUI_BMPfile.o \
-       $(DIR_BIN)/GUI_Paint.o $(DIR_BIN)/main.o $(DIR_BIN)/RPI_gpiod.o
+# Default EPD model
+EPD ?= epd4in2V2
 
-epd: $(OBJS)
-    gcc -o epd $(OBJS)
+OBJ_C_EPD = ${DIR_EPD}/EPD_4in2_V2.c
 
-$(DIR_BIN)/DEV_Config.o: $(DIR_Config)/DEV_Config.c $(DIR_Config)DEV_Config.h $(DIR_Config)RPI_gpiod.h
-    gcc -o $(DIR_BIN)/DEV_Config.o -c $(DIR_Config)DEV_Config.c
 
-$(DIR_BIN)/dev_hardware_SPI.o: $(DIR_Config)/dev_hardware_SPI.c $(DIR_Config)/dev_hardware_SPI.h
-    gcc -o $(DIR_BIN)/dev_hardware_SPI.o -c dev_hardware_SPI.c
+OBJ_C = $(wildcard ${OBJ_C_EPD} ${DIR_GUI}/*.c ./main.c ${DIR_FONTS}/*.c ./readFile.c)
+OBJ_O = $(patsubst %.c,${DIR_BIN}/%.o,$(notdir ${OBJ_C}))
+RPI_DEV_C = $(wildcard $(DIR_BIN)/dev_hardware_SPI.o $(DIR_BIN)/RPI_gpiod.o $(DIR_BIN)/DEV_Config.o )
+JETSON_DEV_C = $(wildcard $(DIR_BIN)/sysfs_software_spi.o $(DIR_BIN)/sysfs_gpio.o $(DIR_BIN)/DEV_Config.o )
 
-$(DIR_BIN)/EPD_4in2_V2.o: $(DIR_EPD)/EPD_4in2_V2.c $(DIR_EPD)/EPD_4in2_V2.h $(DIR_Config)/Debug.h
-    gcc -o $(DIR_BIN)/EPD_4in2_V2.o -c EPD_4in2_V2.c
 
-$(DIR_BIN)/font24.o: $(DIR_FONTS)/font24.c $(DIR_FONTS)/fonts.h
-    gcc -o $(DIR_BIN)/font24.o -c font24.c
+DEBUG = -D DEBUG
 
-$(DIR_BIN)/GUI_BMPfile.o: $(DIR_GUI)/GUI_BMPfile.c $(DIR_GUI)/GUI_BMPfile.h $(DIR_GUI)/GUI_Paint.h $(DIR_Config)/Debug.h
-    gcc -o $(DIR_BIN)/GUI_BMPfile.o -c GUI_BMPfile.c
+# USELIB_RPI = USE_BCM2835_LIB
+# USELIB_RPI = USE_WIRINGPI_LIB
+USELIB_RPI = USE_LGPIO_LIB
+# USELIB_RPI = USE_DEV_LIB
 
-$(DIR_BIN)/GUI_Paint.o: $(DIR_GUI)/GUI_Paint.c
-    gcc -o $(DIR_BIN)/GUI_Paint.o -c GUI_Paint.c
+LIB_RPI=-Wl,--gc-sections
+ifeq ($(USELIB_RPI), USE_BCM2835_LIB)
+	LIB_RPI += -lbcm2835 -lm 
+else ifeq ($(USELIB_RPI), USE_WIRINGPI_LIB)
+	LIB_RPI += -lwiringPi -lm 
+else ifeq ($(USELIB_RPI), USE_LGPIO_LIB)
+	LIB_RPI += -llgpio -lm 
+else ifeq ($(USELIB_RPI), USE_DEV_LIB)
+	LIB_RPI += -lgpiod -lm 
+endif
+DEBUG_RPI = -D $(USELIB_RPI) -D RPI
 
-$(DIR_BIN)/main.o: main.c $(DIR_EPD)/EPD_4in2_V2.h $(DIR_Config)/DEV_Config.h $(DIR_GUI)/GUI_Paint.h readFile.h
-    gcc -o $(DIR_BIN)/main.o -c main.c
+USELIB_JETSONI = USE_DEV_LIB
+# USELIB_JETSONI = USE_HARDWARE_LIB
+ifeq ($(USELIB_JETSONI), USE_DEV_LIB)
+	LIB_JETSONI = -lm 
+else ifeq ($(USELIB_JETSONI), USE_HARDWARE_LIB)
+	LIB_JETSONI = -lm 
+endif
+DEBUG_JETSONI = -D $(USELIB_JETSONI) -D JETSON
 
-$(DIR_BIN)/RPI_gpiod.o: $(DIR_Config)/RPI_gpiod.c $(DIR_Config)/RPI_gpiod.h
-    gcc -o $(DIR_BIN)/RPI_gpiod.o -c RPI_gpiod.c
+.PHONY : RPI JETSON clean
+
+RPI:RPI_DEV RPI_epd 
+JETSON: JETSON_DEV JETSON_epd
+
+TARGET = epd
+CC = gcc
+MSG = -g -O -ffunction-sections -fdata-sections -Wall
+CFLAGS = $(MSG) -D $(EPD)
+
+RPI_epd:${OBJ_O}
+	echo $(@)
+	$(CC) $(CFLAGS) -D RPI $(OBJ_O) $(RPI_DEV_C) -o $(TARGET) $(LIB_RPI) $(DEBUG)
+	
+JETSON_epd:${OBJ_O}
+	echo $(@)
+	$(CC) $(CFLAGS) $(OBJ_O) $(JETSON_DEV_C) -o $(TARGET) $(LIB_JETSONI) $(DEBUG)
+
+$(shell mkdir -p $(DIR_BIN))
+
+${DIR_BIN}/%.o: %.c
+	$(CC) $(CFLAGS) -c	$< -o $@ -I $(DIR_Config) -I $(DIR_GUI) -I $(DIR_EPD) $(DEBUG)
+	
+${DIR_BIN}/%.o:$(DIR_EPD)/%.c
+	$(CC) $(CFLAGS) -c	$< -o $@ -I $(DIR_Config) $(DEBUG)
+
+${DIR_BIN}/%.o:$(DIR_FONTS)/%.c 
+	$(CC) $(CFLAGS) -c	$< -o $@ $(DEBUG)
+	
+${DIR_BIN}/%.o:$(DIR_GUI)/%.c
+	$(CC) $(CFLAGS) -c	$< -o $@ -I $(DIR_Config) $(DEBUG)
+
+RPI_DEV:
+	$(CC) $(CFLAGS) $(DEBUG_RPI) -c	 $(DIR_Config)/dev_hardware_SPI.c -o $(DIR_BIN)/dev_hardware_SPI.o $(LIB_RPI) $(DEBUG)
+	$(CC) $(CFLAGS) $(DEBUG_RPI) -c	 $(DIR_Config)/RPI_gpiod.c -o $(DIR_BIN)/RPI_gpiod.o $(LIB_RPI) $(DEBUG)
+	$(CC) $(CFLAGS) $(DEBUG_RPI) -c	 $(DIR_Config)/DEV_Config.c -o $(DIR_BIN)/DEV_Config.o $(LIB_RPI) $(DEBUG)
+	
+JETSON_DEV:
+	$(CC) $(CFLAGS) $(DEBUG_JETSONI) -c	 $(DIR_Config)/sysfs_software_spi.c -o $(DIR_BIN)/sysfs_software_spi.o $(LIB_JETSONI) $(DEBUG)
+	$(CC) $(CFLAGS) $(DEBUG_JETSONI) -c	 $(DIR_Config)/sysfs_gpio.c -o $(DIR_BIN)/sysfs_gpio.o $(LIB_JETSONI) $(DEBUG)
+	$(CC) $(CFLAGS) $(DEBUG_JETSONI) -c	 $(DIR_Config)/DEV_Config.c -o $(DIR_BIN)/DEV_Config.o $(LIB_JETSONI)  $(DEBUG)
 
 clean :
 	rm $(DIR_BIN)/*.* 
-	rm epd
+	rm $(TARGET) 
 

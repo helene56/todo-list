@@ -1,0 +1,63 @@
+DIR_Config	 = ./lib/Config
+DIR_EPD		 = ./lib/e-Paper
+DIR_FONTS	 = ./lib/Fonts
+DIR_GUI		 = ./lib/GUI
+DIR_BIN		 = ./bin
+
+MSG = -g -O -ffunction-sections -fdata-sections -Wall
+CFLAGS = $(MSG) -D epd
+
+USELIB_RPI = USE_LGPIO_LIB
+
+LIB_RPI=-Wl,--gc-sections
+ifeq ($(USELIB_RPI), USE_BCM2835_LIB)
+	LIB_RPI += -lbcm2835 -lm 
+else ifeq ($(USELIB_RPI), USE_WIRINGPI_LIB)
+	LIB_RPI += -lwiringPi -lm 
+else ifeq ($(USELIB_RPI), USE_LGPIO_LIB)
+	LIB_RPI += -llgpio -lm 
+else ifeq ($(USELIB_RPI), USE_DEV_LIB)
+	LIB_RPI += -lgpiod -lm 
+endif
+
+INCLUDES = -I$(DIR_Config) -I$(DIR_EPD) -I$(DIR_FONTS) -I$(DIR_GUI)
+
+OBJS = $(DIR_BIN)/DEV_Config.o $(DIR_BIN)/dev_hardware_SPI.o $(DIR_BIN)/EPD_4in2_V2.o \
+	   $(DIR_BIN)/font24.o $(DIR_BIN)/GUI_BMPfile.o $(DIR_BIN)/GUI_Paint.o \
+	   $(DIR_BIN)/main.o $(DIR_BIN)/RPI_gpiod.o $(DIR_BIN)/readFile.o
+
+epd: $(OBJS)
+	gcc $(CFLAGS) -o epd $(OBJS) $(LIB_RPI)
+
+$(DIR_BIN)/readFile.o: readFile.c readFile.h
+	gcc -o $(DIR_BIN)/readFile.o -c readFile.c
+
+$(DIR_BIN)/DEV_Config.o: $(DIR_Config)/DEV_Config.c $(DIR_Config)/DEV_Config.h $(DIR_Config)/RPI_gpiod.h
+	gcc -o $(DIR_BIN)/DEV_Config.o -c $(DIR_Config)/DEV_Config.c $(INCLUDES) $(LIB_RPI)
+
+$(DIR_BIN)/dev_hardware_SPI.o: $(DIR_Config)/dev_hardware_SPI.c $(DIR_Config)/dev_hardware_SPI.h
+	gcc -o $(DIR_BIN)/dev_hardware_SPI.o -c $(DIR_Config)/dev_hardware_SPI.c $(INCLUDES)
+
+$(DIR_BIN)/EPD_4in2_V2.o: $(DIR_EPD)/EPD_4in2_V2.c $(DIR_EPD)/EPD_4in2_V2.h $(DIR_Config)/Debug.h
+	gcc -o $(DIR_BIN)/EPD_4in2_V2.o -c $(DIR_EPD)/EPD_4in2_V2.c $(INCLUDES)
+
+$(DIR_BIN)/font24.o: $(DIR_FONTS)/font24.c $(DIR_FONTS)/fonts.h
+	gcc -o $(DIR_BIN)/font24.o -c $(DIR_FONTS)/font24.c $(INCLUDES)
+
+$(DIR_BIN)/GUI_BMPfile.o: $(DIR_GUI)/GUI_BMPfile.c $(DIR_GUI)/GUI_BMPfile.h $(DIR_GUI)/GUI_Paint.h $(DIR_Config)/Debug.h
+	gcc -o $(DIR_BIN)/GUI_BMPfile.o -c $(DIR_GUI)/GUI_BMPfile.c $(INCLUDES)
+
+$(DIR_BIN)/GUI_Paint.o: $(DIR_GUI)/GUI_Paint.c
+	gcc -o $(DIR_BIN)/GUI_Paint.o -c $(DIR_GUI)/GUI_Paint.c $(INCLUDES)
+
+$(DIR_BIN)/main.o: main.c $(DIR_EPD)/EPD_4in2_V2.h $(DIR_Config)/DEV_Config.h $(DIR_GUI)/GUI_Paint.h readFile.h
+	gcc -o $(DIR_BIN)/main.o -c main.c $(INCLUDES)
+
+$(DIR_BIN)/RPI_gpiod.o: $(DIR_Config)/RPI_gpiod.c $(DIR_Config)/RPI_gpiod.h
+	gcc -o $(DIR_BIN)/RPI_gpiod.o -c $(DIR_Config)/RPI_gpiod.c $(INCLUDES) $(LIB_RPI)
+
+
+clean :
+	rm $(DIR_BIN)/*.* 
+	rm epd
+

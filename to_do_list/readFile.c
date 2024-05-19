@@ -12,16 +12,16 @@ char lines[MAX_LINES][MAX_LENGTH];
 char *test[MAX_LINES];
 char line[MAX_LENGTH];
 int count = 0;
+int SIZE;
 
-
-int main()
-{
-    read_strings();
+// int main()
+// {
+//     read_strings();
     
-    for (char **p = test; p < test + count; p++) {
-        printf("%s\n", *p);
-    }
-}
+//     for (char **p = test; p < test + count; p++) {
+//         printf("%s\n", *p);
+//     }
+// }
 
 int read_strings()
     {
@@ -51,7 +51,8 @@ int read_strings()
         }
 
         fclose(file);
-        SIZE = sizeof(test) / sizeof(test[0]);
+        // SIZE = sizeof(test) / sizeof(test[0]);
+        SIZE = count;
     }
 
 
