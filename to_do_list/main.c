@@ -4,6 +4,7 @@
 #include <stdio.h>          // For printf function
 #include "GUI_Paint.h"
 #include <string.h>  // Include the string.h header for strlen()
+#include "readFile.h"
 
 
 int main() {
@@ -33,7 +34,7 @@ int main() {
     
     // test array
     // Define an array of pointers to char
-    const char *test[] = {"missing to do", "chapter15 projects"};
+    char *test[] = {""};
     int n = sizeof(test) / sizeof(test[0]);
     int place = 0;
     for (int i = 0; i < n; i++)
