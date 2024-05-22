@@ -515,6 +515,16 @@ parameter:
     Color_Foreground : Select the foreground color
     Color_Background : Select the background color
 ******************************************************************************/
+void PrintBitmapData(const uint8_t* data, int length) {
+    for (int i = 0; i < length; i++) {
+        if (i % 8 == 0) {
+            printf("\n");
+        }
+        printf("0x%02x ", data[i]);
+    }
+    printf("\n");
+}
+
 void Paint_DrawChar(UWORD Xpoint, UWORD Ypoint, const char Acsii_Char,
                     sFONT* Font, UWORD Color_Foreground, UWORD Color_Background)
 {
@@ -524,9 +534,40 @@ void Paint_DrawChar(UWORD Xpoint, UWORD Ypoint, const char Acsii_Char,
         Debug("Paint_DrawChar Input exceeds the normal display range\r\n");
         return;
     }
+    printf("Drawing character '%c'\n", Acsii_Char);
+    printf("Character: '%c', ASCII value: 0x%X\n", Acsii_Char, (unsigned char)Acsii_Char);
+    unsigned char first_byte = (unsigned char)Acsii_Char;
 
-    uint32_t Char_Offset = (Acsii_Char - ' ') * Font->Height * (Font->Width / 8 + (Font->Width % 8 ? 1 : 0));
+
+
+    // trying my own update to get the e-paper display to handle æøå characters
+    uint32_t Char_Offset;
+    if (first_byte >= 0x20 && first_byte <= 0x7E) {
+        // Standard ASCII range
+        Char_Offset = (first_byte - 0x20) * Font->Height * ((Font->Width + 7) / 8);
+        printf("Drawing standard ASCII character '%c' with offset %d\n", first_byte, Char_Offset);
+    } else if (first_byte == 0x7F) {
+        // Character æ (mapped to 0x7F)
+        Char_Offset = (0x7F - 0x20) * Font->Height * ((Font->Width + 7) / 8);
+        printf("Drawing character 'æ' with offset %d\n", Char_Offset);
+    } else if (first_byte == 0x80) {
+        // Character ø (mapped to 0x80)
+        Char_Offset = (0x80 - 0x20) * Font->Height * ((Font->Width + 7) / 8);
+        printf("Drawing character 'ø' with offset %d\n", Char_Offset);
+    } else if (first_byte == 0x81) {
+        // Character å (mapped to 0x81)
+        Char_Offset = (0x81 - 0x20) * Font->Height * ((Font->Width + 7) / 8);
+        printf("Drawing character 'å' with offset %d\n", Char_Offset);
+    } else {
+        // Unsupported character
+        printf("Unsupported character: %c, ASCII value: 0x%X\n", first_byte, first_byte);
+        return;
+    }
+    printf("Drawing character '%c' with offset %d\n", Acsii_Char, Char_Offset);
+    // Char_Offset = (Acsii_Char - ' ') * Font->Height * (Font->Width / 8 + (Font->Width % 8 ? 1 : 0));
     const unsigned char *ptr = &Font->table[Char_Offset];
+    
+    PrintBitmapData(ptr, 72);
 
     for (Page = 0; Page < Font->Height; Page ++ ) {
         for (Column = 0; Column < Font->Width; Column ++ ) {
@@ -576,11 +617,42 @@ void Paint_DrawString_EN(UWORD Xstart, UWORD Ystart, const char * pString,
     }
 
     while (* pString != '\0') {
-        //if X direction filled , reposition to(Xstart,Ypoint),Ypoint is Y direction plus the Height of the character
-        if ((Xpoint + Font->Width ) > Paint.Width ) {
-            Xpoint = Xstart;
-            Ypoint += Font->Height;
+        if ((unsigned char)*pString < 0x80) {
+            // Single-byte character (standard ASCII)
+            Paint_DrawChar(Xpoint, Ypoint, *pString, Font, Color_Background, Color_Foreground);
+            Xpoint += Font->Width;
+            pString++;
+        } else if ((unsigned char)*pString == 0xC3 && *(pString + 1) != '\0') {
+            // Two-byte character (UTF-8)
+            unsigned char second_byte = (unsigned char)*(pString + 1);
+            char mapped_char = '\0';
+            switch (second_byte) {
+                case 0xA6:
+                    // Character æ
+                    mapped_char = 0x7F;
+                    break;
+                case 0xB8:
+                    // Character ø
+                    mapped_char = 0x80;
+                    break;
+                case 0xA5:
+                    // Character å
+                    mapped_char = 0x81;
+                    break;
+                default:
+                    // Unsupported character, skip it
+                    pString += 2;
+                    continue;
+            }
+            Paint_DrawChar(Xpoint, Ypoint, mapped_char, Font, Color_Background, Color_Foreground);
+            Xpoint += Font->Width;
+            pString += 2;
         }
+        //if X direction filled , reposition to(Xstart,Ypoint),Ypoint is Y direction plus the Height of the character
+        // if ((Xpoint + Font->Width ) > Paint.Width ) {
+        //     Xpoint = Xstart;
+        //     Ypoint += Font->Height;
+        // }
 
         // If the Y direction is full, reposition to(Xstart, Ystart)
         if ((Ypoint  + Font->Height ) > Paint.Height ) {
