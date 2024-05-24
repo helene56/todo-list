@@ -537,6 +537,7 @@ void Paint_DrawChar(UWORD Xpoint, UWORD Ypoint, const char Acsii_Char,
     printf("Drawing character '%c'\n", Acsii_Char);
     printf("Character: '%c', ASCII value: 0x%X\n", Acsii_Char, (unsigned char)Acsii_Char);
     unsigned char first_byte = (unsigned char)Acsii_Char;
+    
 
 
 
@@ -563,11 +564,11 @@ void Paint_DrawChar(UWORD Xpoint, UWORD Ypoint, const char Acsii_Char,
         printf("Unsupported character: %c, ASCII value: 0x%X\n", first_byte, first_byte);
         return;
     }
-    printf("Drawing character '%c' with offset %d\n", Acsii_Char, Char_Offset);
+    
     // Char_Offset = (Acsii_Char - ' ') * Font->Height * (Font->Width / 8 + (Font->Width % 8 ? 1 : 0));
     const unsigned char *ptr = &Font->table[Char_Offset];
     
-    PrintBitmapData(ptr, 72);
+    // PrintBitmapData(ptr, 72);
 
     for (Page = 0; Page < Font->Height; Page ++ ) {
         for (Column = 0; Column < Font->Width; Column ++ ) {
@@ -617,6 +618,8 @@ void Paint_DrawString_EN(UWORD Xstart, UWORD Ystart, const char * pString,
     }
 
     while (* pString != '\0') {
+        printf("starting loop\n");
+        printf("unsigned char %X\n", (unsigned char)*pString);
         if ((unsigned char)*pString < 0x80) {
             // Single-byte character (standard ASCII)
             Paint_DrawChar(Xpoint, Ypoint, *pString, Font, Color_Background, Color_Foreground);
@@ -644,15 +647,16 @@ void Paint_DrawString_EN(UWORD Xstart, UWORD Ystart, const char * pString,
                     pString += 2;
                     continue;
             }
+            printf("Mapped UTF-8 character to ASCII: '%c' (0x%X)\n", mapped_char, mapped_char);
             Paint_DrawChar(Xpoint, Ypoint, mapped_char, Font, Color_Background, Color_Foreground);
             Xpoint += Font->Width;
             pString += 2;
         }
-        //if X direction filled , reposition to(Xstart,Ypoint),Ypoint is Y direction plus the Height of the character
-        // if ((Xpoint + Font->Width ) > Paint.Width ) {
-        //     Xpoint = Xstart;
-        //     Ypoint += Font->Height;
-        // }
+        // if X direction filled , reposition to(Xstart,Ypoint),Ypoint is Y direction plus the Height of the character
+        if ((Xpoint + Font->Width ) > Paint.Width ) {
+            Xpoint = Xstart;
+            Ypoint += Font->Height;
+        }
 
         // If the Y direction is full, reposition to(Xstart, Ystart)
         if ((Ypoint  + Font->Height ) > Paint.Height ) {

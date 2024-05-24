@@ -41,12 +41,12 @@ int main() {
 
     for (int i = 0; i < SIZE; i++)
     {
-        printf("place: %d\n", place);
         Paint_DrawString_EN(10, 20 + place, test[i], &Font24, WHITE, BLACK);
-        printf("%s\n", test[i]);
+        // printf("%s\n", test[i]);
         place += 60;
     }
-    
+    Paint_DrawString_EN(10, 210, "Hej! ~~Ælpåø", &danfoFont24, WHITE, BLACK);
+    Paint_DrawString_EN(10, 230, "hej 123 æøå", &PoetsenOneFont24, WHITE, BLACK);
     printf("drew string...\r\n");
     // Display the image on the e-Paper
     EPD_4IN2_V2_Display(BlackImage);

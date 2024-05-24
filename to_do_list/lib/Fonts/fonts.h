@@ -84,6 +84,12 @@ extern sFONT Font20;
 extern sFONT Font16;
 extern sFONT Font12;
 extern sFONT Font8;
+extern sFONT customFont24;
+extern sFONT danfoFont24;
+extern sFONT RobotoFont24;
+extern sFONT OpenSansFont24;
+extern sFONT RedditMonoFont24;
+extern sFONT PoetsenOneFont24;
 extern sFONT FontCustom20; // custom font added robot medium
 extern sFONT FontCustom1_20; // custom font changed font byte width to 1
 extern sFONT FontCustom2_20; // custom font changed xoffset to -1
